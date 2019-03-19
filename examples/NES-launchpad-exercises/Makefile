@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = nullnet-unicast nullnet-broadcast
+CONTIKI_PROJECT = launchpad-exercises
 PLATFORMS_ONLY = cc26x0-cc13x0
 all: $(CONTIKI_PROJECT)
 

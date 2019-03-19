@@ -52,6 +52,7 @@
 
 /* Configuration */
 #define SEND_INTERVAL (8 * CLOCK_SECOND)
+//launchpad_link_layer_address {{ 0x000, 0x0012, 0x004b, 0x0000, 0x000f, 0x0024, 0x0000, 0x0002 }}
 static linkaddr_t dest_addr =         {{ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }};
 
 #if MAC_CONF_WITH_TSCH
@@ -91,7 +92,7 @@ PROCESS_THREAD(nullnet_example_process, ev, data)
   nullnet_buf = (uint8_t *)&count;
   nullnet_len = sizeof(count);
   nullnet_set_input_callback(input_callback);
-
+  LOG_INFO_LLADDR(&linkaddr_node_addr);
   if(!linkaddr_cmp(&dest_addr, &linkaddr_node_addr)) {
     etimer_set(&periodic_timer, SEND_INTERVAL);
     while(1) {
