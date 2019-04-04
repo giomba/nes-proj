@@ -1,0 +1,116 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[italian]{babel}
+\usepackage[utf8]{inputenc}
+
+% Larger borders -- we do not want do waste paper, even if it is only paper on screen =)
+\usepackage[top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+
+% Palatino font (nicer serif font: Times is for oldies)
+\renewcommand*\rmdefault{ppl}
+
+% Nested itemize list bullet style
+\renewcommand{\labelitemi}{$\bullet$}
+\renewcommand{\labelitemii}{$\circ$}
+\renewcommand{\labelitemiii}{--}
+
+% Math packages
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+% Graphic packages
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usepackage{forest,array}
+\usetikzlibrary{shadows}
+
+% Graphs styles
+\forestset{
+  giombatree/.style={
+    for tree={
+      grow = east,
+      parent anchor=east,
+      child anchor=west,
+      edge={rounded corners=2mm},
+      fill=violet!5,
+      drop shadow,
+      l sep=10mm,
+      edge path={
+        \noexpand\path [draw, \forestoption{edge}] (!u.parent anchor) -- +(5mm,0) -- (.child anchor)\forestoption{edge label};
+      }
+    }
+  }
+}
+\forestset{
+  qtree/.style={
+    for tree={
+      parent anchor=south,
+      child anchor=north,
+      align=center,
+      edge={rounded corners=2mm},
+      fill=violet!5,
+      drop shadow,
+      l sep=10mm,
+    }
+  }
+}
+
+
+% Hides ugly links from the index
+\usepackage[hidelinks]{hyperref}
+% Landscape format pdf pagess
+\usepackage{pdflscape}
+
+\newcommand{\systemname}{Intelligent Supermarket}
+
+\title{NES Project}
+\author{F. Barbarulo, D. Comola, G. B. Rolandi}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\clearpage
+
+\section{Requirements}
+The project has to follow these guidelines:
+\begin{itemize}
+  \item Each use case must include 3 different roles (3 different firmware)
+	\item At least 1 sensor must produce some information
+	\item At least 1 sensor must consume the produced information
+	\item The MAC adress must be discovered by broadcast messages (not hardcoded)
+	\item Both broadcast and unicast communication must be used
+	\item Use at least one timer between \texttt{etimer} and \texttt{ctimer}
+	\item Use at least two of the interactions human(environment)/sensor and viceversa, that we have seen during lectures on each sensor:
+		\begin{itemize}
+			\item Inputs from serial line
+			\item Leds
+			\item Buttons
+			\item Batmon sensor
+		\end{itemize}
+\end{itemize}
+
+\section{Scenario}
+The \textit{\systemname} aims to build a smart supermarket where customers do shopping in an efficient way reducing the time spent at the cash queue. All products sold in the market are fitted with RFID tag which contains information about the type, expiration date, price. All the costumers are provided with a personal fidelity card which is used to take advantage of this service and make the purchase as a debit or credit card.
+
+The system is based on three main components:
+
+\begin{itemize}
+  \item \textit{smart cart} equiped with a sensor capable to read product RFID tags;
+  \item \textit{cart assigner} responsible for assigning tha smart cart to the right costumer by reading the market fidelity card associated to the costumer;
+  \item \textit{smart cash register} which collects the purchase informations downloading them from the smart cart at the end of the shop.  
+\end{itemize}
+
+\subsection{Smart cart}
+The smart cart registers a product whenever it is put in the cart. It reads the RFID tag and update the current total. If it reads the same product tag twice it means that the product has been removed from the cart. By means of the tag it can also warns when the last product added to the cart is expired or the current purchase total has exceeded the card residual amount.
+
+\subsection{Cart assigner}
+When a customer wants to use the service, he has to make the cart assigner read his fidelity card. The cart assigner unlocks the first available cart and associates it to the costumer through the fidelity card number. The right cart is released by pressing the two buttons simultaniously and the green led turns on. If a costumer tries to take the wrong cart it is not released and the red led turns on.
+
+\subsection{Smart cash register}
+Whenever a cart reaches the cash register, the costumer has to notify the conclusion of the purchase by pressing a button on the cart. The cash register is allowed to download the purchase informations and to make the payment. If the payment succeeds a green led is shown, otherwise the red led informs the failure and a supervisor is called in order to finalize the purchase.
+
+
+\end{document}
