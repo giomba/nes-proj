@@ -45,6 +45,7 @@
 #define LOG_MODULE "App"
 #define LOG_LEVEL LOG_LEVEL_INFO
 
+// !! TO INIT WITH CART MAC ADDRESS !! //
 static linkaddr_t dest_addr = {{0x00, 0x12, 0x4b, 0x00, 0x0f, 0x82, 0x18, 0x04}};
 
 
@@ -76,13 +77,12 @@ void scan_product(struct Product *p){
 PROCESS_THREAD(product_proc, ev, data){
 	PROCESS_BEGIN();
 	// init random number generator
-	unsigned int magic_seed = 12;
+	unsigned int magic_seed = 12; // oooh :o
 	srand(magic_seed);
-	
+
 	while(1) {
 		PROCESS_YIELD();
 		if (ev == button_hal_press_event){
-			
 			// product generation
 			unsigned int index = rand() % 3;
 			scan_product(&product_list[index]);
