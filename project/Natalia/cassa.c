@@ -19,6 +19,7 @@ enum message_type{CASH_OUT_MSG, PRODUCT_MSG, ITEM_ELEM_MSG, BASKET_MSG, START_OF
 
 typedef struct basket_msg
 {
+	enum message_type msg_type;
 	uint8_t n_products;
 	uint8_t customer_id;
 	linkaddr_t* address;
@@ -28,6 +29,7 @@ typedef struct basket_msg
 
 typedef struct user_invoice
 {
+	enum message_type msg_type;
 	uint8_t n_prods;
 	float total_sum;
 	uint8_t customer_id;
@@ -39,11 +41,13 @@ typedef struct user_invoice
 
 typedef struct cash_out_msg
 {
+	enum message_type msg_type;
 	uint8_t customer_id;
 }cash_out_msg;
 
 typedef struct product_msg{
 	
+	enum message_type msg_type;
 	uint8_t customer_id;
 	uint8_t product_id;
 	float prize;
@@ -52,12 +56,7 @@ typedef struct product_msg{
 
 typedef struct msg{
 	enum message_type msg_type;
-	cash_out_msg cash_out;
-	product_msg product;
-	basket_msg basket;
 	
-	
-    
 }msg;
 
 PROCESS(cassa_main_process, "Cassa process");
@@ -104,12 +103,13 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 		//we need to receive an additional message to start the process of receiving the products because if we start receiving the products immediately 
 		//in the case of parallel processes we wouldnt know to what client and what basket that product is assosiated with
 		if (received_msg.msg_type == BASKET_MSG) {
+			basket_msg *basket = (basket_msg*) (&received_msg);
 			uint8_t index = index_free_spot(invoices);
 			if (index != -1 ) {
-				invoices[index].n_prods = received_msg.basket.n_products;
+				invoices[index].n_prods = basket->n_products;
 				invoices[index].total_sum = 0;
-				invoices[index].customer_id = received_msg.basket.customer_id;
-				invoices[index].address_basket = received_msg.basket.address;
+				invoices[index].customer_id = basket->customer_id;
+				invoices[index].address_basket = basket->address;
 				
 				msg start_sending_list;
 				start_sending_list.msg_type = START_OF_LIST_PRODUCTS_MSG;
@@ -126,10 +126,11 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 			printf("Reached max number of customers");
 		}
 		if (received_msg.msg_type == PRODUCT_MSG) {
-			uint8_t index = invoice_index(received_msg.product.customer_id, invoices);
+			product_msg *product = (product_msg*)(&received_msg);
+			uint8_t index = invoice_index(product->customer_id, invoices);
 			if (index != -1) {
 				if (invoices[index].n_prods > 0) {			
-					invoices[index].total_sum += received_msg.product.prize;
+					invoices[index].total_sum += product->prize;
 					invoices[index].n_prods--;
 				}
 				if (invoices[index].n_prods == 0) {
@@ -146,7 +147,7 @@ PROCESS_THREAD(cassa_main_process, ev, data) {
 	PROCESS_BEGIN();
 
 	static uint8_t customer_id;
-	static msg bro_customer_id;
+	static cash_out_msg bro_customer_id;
 	
 	cc26xx_uart_set_input(serial_line_input_byte);
 	serial_line_init();
@@ -165,7 +166,7 @@ PROCESS_THREAD(cassa_main_process, ev, data) {
 		printf("id: %d\n", (int)customer_id);
 
 		bro_customer_id.msg_type = CASH_OUT_MSG;
-		bro_customer_id.cash_out.customer_id = customer_id; 
+		bro_customer_id.customer_id = customer_id; 
 
 		LOG_INFO("Sending BROADCAST customer id: %d\n", (int)customer_id);
 		LOG_INFO_LLADDR(NULL);
