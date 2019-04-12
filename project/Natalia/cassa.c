@@ -68,7 +68,7 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 				invoices[index].n_prods = basket->n_products;
 				invoices[index].total_sum = 0;
 				invoices[index].customer_id = basket->customer_id;
-				invoices[index].address_basket = basket->address;
+				invoices[index].address_basket = source_address;
 				
 				msg start_sending_list;
 				start_sending_list.msg_type = START_OF_LIST_PRODUCTS_MSG;
