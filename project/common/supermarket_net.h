@@ -43,7 +43,7 @@ typedef struct assign_msg
 {
 	enum message_type msg_type;
 	uint32_t customer_id;
-}assing_msg;
+}assign_msg;
 
 
 typedef struct basket_msg
