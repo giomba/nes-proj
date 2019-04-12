@@ -2,6 +2,13 @@
 
 struct MacPkt pkt;
 
+uint8_t net_buffer[256];
+
+void net_init() {
+    nullnet_buf = net_buffer;
+    nullnet_set_input_callback(net_recv);
+}
+
 void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linkaddr_t* dst) {
     /* discard too long packet */
     if (len > 128) {
@@ -26,5 +33,11 @@ void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linka
             LOG_INFO("[W] message type unknown\n");
             break;
     }
+}
+
+void net_send(const void* data, uint16_t len, const linkaddr_t* dst) {
+    memcpy(net_buffer, data, len);
+    nullnet_len = len;
+    NETSTACK_NETWORK.output(dst);
 }
 

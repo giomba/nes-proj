@@ -25,6 +25,7 @@ extern struct MacPkt pkt;
 
 extern struct process cart_main_process;
 
+void net_init(void);
 void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linkaddr_t* dst);
 void net_send(const void* data, uint16_t len, const linkaddr_t* dst);
 

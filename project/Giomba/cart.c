@@ -8,57 +8,27 @@
 #include "event.h"
 #include "log.h"
 #include "sendrecv.h"
+#include "status.h"
 
 //static linkaddr_t destination_address = {{ 0x00, 0x12, 0x4b, 0x00, 0x0f, 0x8f, 0x18, 0x11 }};
+
 
 PROCESS(cart_main_process, "Cart Process");
 AUTOSTART_PROCESSES(&cart_main_process);
 
-enum CartStatus {
-	NOT_ASSOCIATED,
-	ASSOCIATED,
-	SHOPPING,
-	CASHOUT
-} status;
-
-static uint8_t net_buffer[256];
-static struct etimer broadcast_timer;
-
-void s_not_associated(process_event_t ev, process_data_t data) {
-    if (ev == PROCESS_EVENT_TIMER) {
-        // send broadcast message to request association with assigner
-        if (etimer_expired(&broadcast_timer)) {
-            //net_send(/*TODO*/);
-        }
-    }
-    else if (ev == PROCESS_EVENT_MSG && *((enum CartEvent*)data) == CART_EVENT_ASSOCIATED) {
-        status = ASSOCIATED;
-    }
-}
-
-
 PROCESS_THREAD(cart_main_process, ev, data) {
 	PROCESS_BEGIN();
-//	SENSORS_ACTIVATE(batmon_sensor);
-
-    /* Local variables allocation */
+    //	SENSORS_ACTIVATE(batmon_sensor);
 
     /*** Variables initialization ***/
-    /* Finite State Machine Status */
-    status = CASHOUT;
 
-    /* Network initialization */
-	nullnet_buf = net_buffer;
-	nullnet_set_input_callback(net_recv);
-
-
-
-    /* fixme garbage */
+    status = NOT_ASSOCIATED;
     etimer_set(&broadcast_timer, 10 * CLOCK_SECOND);
 
+    /*** Subsystem initialization ***/
+    net_init();
 
-
-    /* now actually start */
+    /* START */
 	printf("Hello! I'm the cart.\n");
 
 	while (true) {
