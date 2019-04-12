@@ -21,9 +21,8 @@ PROCESS_THREAD(cart_main_process, ev, data) {
     //	SENSORS_ACTIVATE(batmon_sensor);
 
     /*** Variables initialization ***/
-
     status = NOT_ASSOCIATED;
-    etimer_set(&broadcast_timer, 10 * CLOCK_SECOND);
+    etimer_set(&broadcast_timer, 5 * CLOCK_SECOND);
 
     /*** Subsystem initialization ***/
     net_init();
@@ -39,7 +38,9 @@ PROCESS_THREAD(cart_main_process, ev, data) {
                 s_not_associated(ev, data);
                 break;
             break;
-			case ASSOCIATED: break;
+			case ASSOCIATED:
+                s_associated(ev, data);
+            break;
 			case SHOPPING: break;
 			case CASHOUT: break;
 			default: status = NOT_ASSOCIATED; break;

@@ -24,9 +24,13 @@ void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linka
 
     LOG_INFO("Received %d bytes from ", len); LOG_INFO_LLADDR(src);	LOG_INFO("\n");
 
-    switch ( ((struct Msg*)data)->type ) {
+    switch ( ((msg*)data)->msg_type ) {
         case ASSOCIATION_REPLY_MSG:
             event = CART_EVENT_ASSOCIATED;
+            process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
+        break;
+        case ASSIGNMENT_MSG:
+            event = CART_EVENT_ASSIGNED;
             process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
         break;
         default:
