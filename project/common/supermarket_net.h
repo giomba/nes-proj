@@ -7,8 +7,8 @@ enum message_type {
     BATTERY_STATUS_MSG,
     ASSIGNMENT_MSG,
     CASH_OUT_MSG,
-    PRODUCT_MSG,
-    ITEM_ELEM_MSG,
+    PRODUCT_MSG,                /* from cart to cash */
+    ITEM_MSG,                   /* from item to cart */
     BASKET_MSG,
     START_OF_LIST_PRODUCTS_MSG
 };
