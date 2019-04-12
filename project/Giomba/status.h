@@ -20,5 +20,6 @@ extern enum CartStatus status;
 extern struct etimer broadcast_timer;
 
 void s_not_associated(process_event_t ev, process_data_t data);
+void s_associated(process_event_t ev, process_data_t data);
 
 #endif

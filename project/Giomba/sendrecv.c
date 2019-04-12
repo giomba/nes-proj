@@ -29,6 +29,10 @@ void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linka
             event = CART_EVENT_ASSOCIATED;
             process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
         break;
+        case ASSIGNMENT_MSG:
+            event = CART_EVENT_ASSIGNED;
+            process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
+        break;
         default:
             LOG_INFO("[W] message type unknown\n");
             break;

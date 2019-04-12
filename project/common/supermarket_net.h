@@ -13,7 +13,34 @@ enum MsgType {
 
 struct Msg {
     enum MsgType type;
-    int test;
+    uint8_t test;
+};
+
+struct MsgBatteryStatus {
+    enum MsgType type;
+    uint8_t battery_percentage;
+};
+
+struct MsgAssignment {
+    enum MsgType type;
+    uint32_t customer_id;
+};
+
+struct MsgProduct {
+    enum MsgType type;
+    uint32_t product_id;
+    float price;
+};
+
+struct MsgCashOut {
+    enum MsgType type;
+    uint32_t customer_id;
+};
+
+struct MsgItemElem {
+    enum MsgType type;
+    float price;
+    bool last;
 };
 
 #endif

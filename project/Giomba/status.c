@@ -3,6 +3,7 @@
 enum CartStatus status;
 struct etimer broadcast_timer;
 linkaddr_t assigner_address;
+uint32_t customer_id;
 
 void s_not_associated(process_event_t ev, process_data_t data) {
     if (ev == PROCESS_EVENT_TIMER) {
@@ -21,6 +22,25 @@ void s_not_associated(process_event_t ev, process_data_t data) {
         assigner_address = pkt.src;
         status = ASSOCIATED;
     }
+}
+
+void s_associated(process_event_t ev, process_data_t data) {
+    if (ev == PROCESS_EVENT_TIMER) {
+        /* now send battery level */
+        printf("[I] Sending battery level\n");
+        struct MsgBatteryStatus msg;
+        msg.type = BATTERY_STATUS_MSG;
+        msg.battery_percentage = 77;
+        net_send(&msg, sizeof(msg), &assigner_address);
+        etimer_reset(&broadcast_timer);
+    }
+    if (ev == PROCESS_EVENT_MSG && *((enum CartEvent*)data) == CART_EVENT_ASSIGNED) {
+        /* cart has been assigned to a new customer */
+        printf("[I] Assigned to customer\n");
+        customer_id = ((MsgAssignment*)pkt.data)->customer_id;
+        status = SHOPPING;
+    }
+
 }
 
 
