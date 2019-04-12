@@ -51,7 +51,7 @@ typedef struct basket_msg
 	enum message_type msg_type;
 	uint8_t n_products;
 	uint8_t customer_id;
-	linkaddr_t* address;
+	
 }basket_msg;
 
 
