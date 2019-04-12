@@ -10,54 +10,13 @@
 #include "arch/cpu/cc26x0-cc13x0/dev/cc26xx-uart.h"
 
 #include <stdlib.h>
+#include "../common/supermarket_net.h"
 
 
 
 #define MAX_CUSTOMERS 20
 
-enum message_type{CASH_OUT_MSG, PRODUCT_MSG, ITEM_ELEM_MSG, BASKET_MSG, START_OF_LIST_PRODUCTS_MSG};
 
-typedef struct basket_msg
-{
-	enum message_type msg_type;
-	uint8_t n_products;
-	uint8_t customer_id;
-	linkaddr_t* address;
-	
-	
-}basket_msg;
-
-typedef struct user_invoice
-{
-	enum message_type msg_type;
-	uint8_t n_prods;
-	float total_sum;
-	uint8_t customer_id;
-	linkaddr_t* address_basket;
-	uint8_t empty;
-	
-	
-}user_invoice;
-
-typedef struct cash_out_msg
-{
-	enum message_type msg_type;
-	uint8_t customer_id;
-}cash_out_msg;
-
-typedef struct product_msg{
-	
-	enum message_type msg_type;
-	uint8_t customer_id;
-	uint8_t product_id;
-	float prize;
-
-}product_msg;
-
-typedef struct msg{
-	enum message_type msg_type;
-	
-}msg;
 
 PROCESS(cassa_main_process, "Cassa process");
 AUTOSTART_PROCESSES(&cassa_main_process);
