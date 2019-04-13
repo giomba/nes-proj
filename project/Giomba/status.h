@@ -13,7 +13,8 @@ enum CartStatus {
 	NOT_ASSOCIATED,
 	ASSOCIATED,
 	SHOPPING,
-	CASHOUT
+	CASH_OUT_WAIT4ACK,
+    CASH_OUT_SEND_LIST
 };
 
 extern enum CartStatus status;
@@ -21,5 +22,8 @@ extern struct etimer broadcast_timer;
 
 void s_not_associated(process_event_t ev, process_data_t data);
 void s_associated(process_event_t ev, process_data_t data);
+void s_shopping(process_event_t ev, process_data_t data);
+void s_cash_out_wait4ack(process_event_t ev, process_data_t data);
+void s_cash_out_send_list(process_event_t ev, process_data_t data);
 
 #endif

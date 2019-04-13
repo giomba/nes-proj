@@ -33,6 +33,18 @@ void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linka
             event = CART_EVENT_ASSIGNED;
             process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
         break;
+        case PRODUCT_MSG:
+            event = CART_EVENT_NEW_PRODUCT;
+            process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
+        break;
+        case CASH_OUT_MSG:
+            event = CART_EVENT_CASH_OUT;
+            process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
+        break;
+        case START_OF_LIST_PRODUCTS_MSG:
+            event = CART_EVENT_CASH_OUT_ACK;
+            process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
+        break;
         default:
             LOG_INFO("[W] message type unknown\n");
             break;
