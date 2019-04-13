@@ -16,19 +16,28 @@
 
 #define MAX_CUSTOMERS 20
 
+typedef struct user_invoice
+{
+	uint8_t n_prods;
+	float total_sum;
+	uint8_t customer_id;
+	uint8_t empty;
+    linkaddr_t* address_basket;
+
+}user_invoice;
 
 
 PROCESS(cassa_main_process, "Cassa process");
 AUTOSTART_PROCESSES(&cassa_main_process);
 
-static uint8_t invoice_index(uint32_t customer_id, user_invoice invoices[]) 
+static uint8_t invoice_index(uint32_t customer_id, user_invoice invoices[])
 {
 
 	uint8_t i = 0;
 	for(i = 0; i< MAX_CUSTOMERS;i++) {
-		if (invoices[i].empty==0 && customer_id == invoices[i].customer_id) 
+		if (invoices[i].empty==0 && customer_id == invoices[i].customer_id)
 				return i;
-			
+
 	}
 	return -1;
 
@@ -47,19 +56,19 @@ static uint8_t index_free_spot(user_invoice invoices[])
 
 }
 
-static void input_callback(const void* data, uint16_t len, const linkaddr_t* source_address, const linkaddr_t* destination_address) 
+static void input_callback(const void* data, uint16_t len, const linkaddr_t* source_address, const linkaddr_t* destination_address)
 {
 	msg received_msg;
-		
+
 	static user_invoice invoices[MAX_CUSTOMERS];
-	
-	
+
+
 	if (len == sizeof(*data)) {
 		memcpy (&received_msg, data, sizeof ((msg *)data));
 		LOG_INFO("Received data");
 		LOG_INFO_LLADDR(source_address);	//this is the link layer address
 		LOG_INFO("\n");
-		//we need to receive an additional message to start the process of receiving the products because if we start receiving the products immediately 
+		//we need to receive an additional message to start the process of receiving the products because if we start receiving the products immediately
 		//in the case of parallel processes we wouldnt know to what client and what basket that product is assosiated with
 		if (received_msg.msg_type == BASKET_MSG) {
 			basket_msg *basket = (basket_msg*) (&received_msg);
@@ -68,17 +77,18 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 				invoices[index].n_prods = basket->n_products;
 				invoices[index].total_sum = 0;
 				invoices[index].customer_id = basket->customer_id;
-				invoices[index].address_basket = source_address;
-				
+                memcpy(&invoices[index].address_basket, source_address, sizeof(*source_address));
+				// invoices[index].address_basket = source_address;
+
 				msg start_sending_list;
 				start_sending_list.msg_type = START_OF_LIST_PRODUCTS_MSG;
 				nullnet_buf = (uint8_t*)&start_sending_list;
-				
+
 				LOG_INFO("Sending acknowledgment to start sending list of products");
 				LOG_INFO_("\n");
 				nullnet_len = sizeof(start_sending_list);
 				NETSTACK_NETWORK.output((invoices[index].address_basket));
-				
+
 
 
 			} else
@@ -88,8 +98,8 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 			product_msg *product = (product_msg*)(&received_msg);
 			uint8_t index = invoice_index(product->customer_id, invoices);
 			if (index != -1) {
-				if (invoices[index].n_prods > 0) {			
-					invoices[index].total_sum += product->prize;
+				if (invoices[index].n_prods > 0) {
+					invoices[index].total_sum += product->price;
 					invoices[index].n_prods--;
 				}
 				if (invoices[index].n_prods == 0) {
@@ -107,14 +117,14 @@ PROCESS_THREAD(cassa_main_process, ev, data) {
 
 	static uint8_t customer_id;
 	static cash_out_msg bro_customer_id;
-	
+
 	cc26xx_uart_set_input(serial_line_input_byte);
 	serial_line_init();
 
 	nullnet_buf = (uint8_t*)&bro_customer_id;
 	nullnet_set_input_callback(input_callback);	//this should be moved down?
-	
-	
+
+
 	printf("Dear customer, insert your card id\n");
 
 	while (true) {
@@ -125,7 +135,7 @@ PROCESS_THREAD(cassa_main_process, ev, data) {
 		printf("id: %d\n", (int)customer_id);
 
 		bro_customer_id.msg_type = CASH_OUT_MSG;
-		bro_customer_id.customer_id = customer_id; 
+		bro_customer_id.customer_id = customer_id;
 
 		LOG_INFO("Sending BROADCAST customer id: %d\n", (int)customer_id);
 		LOG_INFO_LLADDR(NULL);
