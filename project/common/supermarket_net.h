@@ -1,14 +1,16 @@
 #ifndef SUPERMARKET_NET_H
 #define SUPERMARKET_NET_H
 
+#include "product.h"
+
 enum message_type {
     ASSOCIATION_REQUEST_MSG,
     ASSOCIATION_REPLY_MSG,
     BATTERY_STATUS_MSG,
     ASSIGNMENT_MSG,
     CASH_OUT_MSG,
-    PRODUCT_MSG,                /* from cart to cash */
     ITEM_MSG,                   /* from item to cart */
+    PRODUCT_MSG,                /* from cart to cash */
     BASKET_MSG,
     START_OF_LIST_PRODUCTS_MSG
 };
@@ -49,9 +51,14 @@ typedef struct basket_msg
 {
 	enum message_type msg_type;
 	uint8_t n_products;
-	uint8_t customer_id;
+	uint8_t customer_id;    /* TODO: why? you already know it */
 }basket_msg;
 
+typedef struct item_msg
+{
+    enum message_type msg_type;
+    product_t p;
+} item_msg;
 
 typedef struct cash_out_msg
 {
@@ -65,18 +72,9 @@ typedef struct product_msg
 	enum message_type msg_type;
 	uint8_t customer_id;
 	uint8_t product_id;
-	float prize;
+	float price;
 
 }product_msg;
 
-typedef struct user_invoice
-{
-	uint8_t n_prods;
-	float total_sum;
-	uint8_t customer_id;
-	uint8_t empty;
-
-
-}user_invoice;
 
 #endif
