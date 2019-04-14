@@ -6,7 +6,7 @@ enum CartStatus status;
 struct etimer broadcast_timer;
 linkaddr_t assigner_address;
 linkaddr_t cash_address;
-uint32_t customer_id;
+uint32_t customer_id = 1234;
 uint8_t nprod;
 product_t list[MAX_PRODUCT];
 
@@ -42,11 +42,10 @@ void s_associated(process_event_t ev, process_data_t data) {
     }
     if (ev == PROCESS_EVENT_MSG && event == CART_EVENT_ASSIGNED) {
         /* cart has been assigned to a new customer */
-        printf("[I] Assigned to customer\n");
         customer_id = ((assign_msg*)pkt.data)->customer_id;
+        printf("[I] Assigned to customer id %d\n", (int)customer_id);
         status = SHOPPING;
     }
-
 }
 
 void s_shopping(process_event_t ev, process_data_t data) {
@@ -63,26 +62,36 @@ void s_shopping(process_event_t ev, process_data_t data) {
         }
         if (event == CART_EVENT_CASH_OUT) {
             /* answer the cash if you are the one with that customer_id */
-            basket_msg m;
-            m.n_products = nprod - 1;
-            m.customer_id = customer_id;    /* TODO -- is this really needed? */
-            net_send(&m, sizeof(m), &cash_address);
-            status = CASH_OUT_WAIT4ACK;
+            if (((cash_out_msg*)pkt.data)->customer_id == customer_id) {
+                printf("[I] It's me! I'm cashing out :-)\n");
+                basket_msg m;
+                m.msg_type = BASKET_MSG;
+                m.n_products = nprod - 1;
+                m.customer_id = customer_id;    /* TODO -- is this really needed? */
+                net_send(&m, sizeof(m), &cash_address);
+                status = CASH_OUT_WAIT4ACK;
+            }
+            else {
+                printf("[I] I am customer id %d; customer id %d is cashing out nearby\n", (int)customer_id, (int)((cash_out_msg*)pkt.data)->customer_id );
+            }
         }
     }
 }
 
 void s_cash_out_wait4ack(process_event_t ev, process_data_t data) {
     /* Just wait for cash ack */
-    if (ev == CART_EVENT_CASH_OUT_ACK) {
+    if (event == CART_EVENT_CASH_OUT_ACK) {
+        printf("[I] Acknoweledgment received fromc cash. Now I'll send the list.\n");
         status = CASH_OUT_SEND_LIST;
+        /* this wakes up the process that otherwise would wait indefinitely for an event that will never occurr */
+        process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
     }
 }
 
 void s_cash_out_send_list(process_event_t ev, process_data_t data) {
     /* Send list, then go back to initial state */
     for (uint8_t i = 0; i < nprod; ++i) {
-        printf("[I] Sending product %d of %d...", i, nprod - 1);
+        printf("[I] Sending product %d of %d...\n", i, nprod - 1);
         product_msg m;
         m.msg_type = PRODUCT_MSG;
         m.customer_id = customer_id;
@@ -95,6 +104,8 @@ void s_cash_out_send_list(process_event_t ev, process_data_t data) {
     customer_id = 0;
     memset(&cash_address, 0, sizeof(cash_address));
 
+    printf("[I] END. Go back to ASSOCIATED status\n");
+    etimer_reset(&broadcast_timer);
     status = ASSOCIATED;
 }
 

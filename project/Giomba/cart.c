@@ -20,7 +20,8 @@ PROCESS_THREAD(cart_main_process, ev, data) {
     //	SENSORS_ACTIVATE(batmon_sensor);
 
     /*** Variables initialization ***/
-    status = NOT_ASSOCIATED;
+    // status = NOT_ASSOCIATED; // TODO DEBUG
+    status = SHOPPING;
     etimer_set(&broadcast_timer, 5 * CLOCK_SECOND);
 
     /*** Subsystem initialization ***/

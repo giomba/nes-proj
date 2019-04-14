@@ -33,7 +33,7 @@ void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linka
             event = CART_EVENT_ASSIGNED;
             process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
         break;
-        case PRODUCT_MSG:
+        case ITEM_MSG:
             event = CART_EVENT_NEW_PRODUCT;
             process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
         break;
