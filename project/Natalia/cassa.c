@@ -20,9 +20,9 @@ typedef struct user_invoice
 {
 	uint8_t n_prods;
 	float total_sum;
-	uint8_t customer_id;
+	uint32_t customer_id;
 	uint8_t empty;
-    linkaddr_t* address_basket;
+    linkaddr_t address_basket;
 
 }user_invoice;
 
@@ -63,9 +63,9 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 	static user_invoice invoices[MAX_CUSTOMERS];
 
 
-	if (len == sizeof(*data)) {
-		memcpy (&received_msg, data, sizeof ((msg *)data));
-		LOG_INFO("Received data");
+//	if (len == sizeof(*data)) {
+		memcpy (&received_msg, data, sizeof(received_msg));
+		LOG_INFO("Received data ");
 		LOG_INFO_LLADDR(source_address);	//this is the link layer address
 		LOG_INFO("\n");
 		//we need to receive an additional message to start the process of receiving the products because if we start receiving the products immediately
@@ -77,25 +77,23 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 				invoices[index].n_prods = basket->n_products;
 				invoices[index].total_sum = 0;
 				invoices[index].customer_id = basket->customer_id;
-                memcpy(&invoices[index].address_basket, source_address, sizeof(*source_address));
+                memcpy(&invoices[index].address_basket, source_address, sizeof(linkaddr_t));
 				// invoices[index].address_basket = source_address;
 
 				msg start_sending_list;
 				start_sending_list.msg_type = START_OF_LIST_PRODUCTS_MSG;
 				nullnet_buf = (uint8_t*)&start_sending_list;
 
-				LOG_INFO("Sending acknowledgment to start sending list of products");
-				LOG_INFO_("\n");
+				LOG_INFO("Sending acknowledgment to start sending list of products to ");
+                LOG_INFO_LLADDR(&(invoices[index].address_basket));
 				nullnet_len = sizeof(start_sending_list);
-				NETSTACK_NETWORK.output((invoices[index].address_basket));
-
-
-
+				NETSTACK_NETWORK.output(&(invoices[index].address_basket));
 			} else
-			printf("Reached max number of customers");
+			printf("Reached max number of customers\n");
 		}
 		if (received_msg.msg_type == PRODUCT_MSG) {
 			product_msg *product = (product_msg*)(&received_msg);
+            printf("Received id: %d, price %f\n", (int)product->product_id, product->price);
 			uint8_t index = invoice_index(product->customer_id, invoices);
 			if (index != -1) {
 				if (invoices[index].n_prods > 0) {
@@ -107,15 +105,15 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 					invoices[index].empty = 1;
 				}
 			}else
-			printf("Customer with that id is not associated to any basket!");
+			printf("Customer with that id is not associated to any basket!\n");
 		}
-	}
+//	}
 }
 
 PROCESS_THREAD(cassa_main_process, ev, data) {
 	PROCESS_BEGIN();
 
-	static uint8_t customer_id;
+	static uint32_t customer_id;
 	static cash_out_msg bro_customer_id;
 
 	cc26xx_uart_set_input(serial_line_input_byte);
