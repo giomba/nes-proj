@@ -51,7 +51,7 @@ typedef struct basket_msg
 {
 	enum message_type msg_type;
 	uint8_t n_products;
-	uint8_t customer_id;    /* TODO: why? you already know it */
+	uint32_t customer_id;
 }basket_msg;
 
 typedef struct item_msg
@@ -63,15 +63,15 @@ typedef struct item_msg
 typedef struct cash_out_msg
 {
 	enum message_type msg_type;
-	uint8_t customer_id;
+	uint32_t customer_id;
 }cash_out_msg;
 
 
 typedef struct product_msg
 {
 	enum message_type msg_type;
-	uint8_t customer_id;
-	uint8_t product_id;
+	uint32_t customer_id;
+	uint32_t product_id;
 	float price;
 
 }product_msg;
