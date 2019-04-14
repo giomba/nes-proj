@@ -11,7 +11,6 @@
 #include "os/dev/serial-line.h"
 #include "arch/cpu/cc26x0-cc13x0/dev/cc26xx-uart.h"
 
-#include "../msg.h"
 #include "assigner_fun.h"
 
 #define LOG_MODULE "App"
@@ -21,9 +20,9 @@ extern cart* cart_list;
 
 //struct cart cart;
 
-//function invoked in order to looking for the most charged cart to assign to the new arrived client	
+//function invoked in order to looking for the most charged cart to assign to the new arrived client
 cart* cart_selection()
-{	
+{
 	uint8_t highest_battery = 0;
 	cart* selected = NULL;
 	cart* current = cart_list;
@@ -36,7 +35,7 @@ cart* cart_selection()
 		}
 		current = current->next;
 	}
-	return selected;		
+	return selected;
 }
 
 //Insert a new cart in the list with the battery info just arrived
@@ -70,15 +69,15 @@ bool bat_upgrade(linkaddr_t* src_cart_addr, uint8_t battery_level)
 			c = c->next;
 		else
 			break;
-	} 
+	}
 	if(!c)
 	{
 		LOG_INFO("Cart not associated yet!\n");
 		return false;
 	}
 	c->battery_status = battery_level;
-	c->assigned = false;  //a battery status is sent only when the cart is in his place, not with a client. So if the cart was out and the the battery status is received, it is now come back in place. 
-	return true;	
+	c->assigned = false;  //a battery status is sent only when the cart is in his place, not with a client. So if the cart was out and the the battery status is received, it is now come back in place.
+	return true;
 }
 
 

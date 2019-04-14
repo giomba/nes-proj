@@ -11,7 +11,6 @@
 #include "os/dev/serial-line.h"
 #include "arch/cpu/cc26x0-cc13x0/dev/cc26xx-uart.h"
 
-#include "../msg.h"
 #include "assigner_fun.h"
 
 #define LOG_MODULE "App"
@@ -46,9 +45,9 @@ AUTOSTART_PROCESSES(&assigner_process);
 cart* cart_list = NULL;
 static bool supermarket_open = true;
 /*
-//function invoked in order to looking for the most charged cart to assign to the new arrived client	
+//function invoked in order to looking for the most charged cart to assign to the new arrived client
 static cart* cart_selection()
-{	
+{
 	uint8_t highest_battery = 0;
 	cart* selected = NULL;
 	cart* current = cart_list;
@@ -61,7 +60,7 @@ static cart* cart_selection()
 		}
 		current = current->next;
 	}
-	return selected;		
+	return selected;
 }
 
 //Insert a new cart in the list with the battery info just arrived
@@ -95,32 +94,32 @@ static bool bat_upgrade(linkaddr_t* src_cart_addr, uint8_t battery_level)
 			c = c->next;
 		else
 			break;
-	} 
+	}
 	if(!c)
 	{
 		LOG_INFO("Cart not associated yet!\n");
 		return false;
 	}
 	c->battery_status = battery_level;
-	c->assigned = false;  //a battery status is sent only when the cart is in his place, not with a client. So if the cart was out and the the battery status is received, it is now come back in place. 
-	return true;	
+	c->assigned = false;  //a battery status is sent only when the cart is in his place, not with a client. So if the cart was out and the the battery status is received, it is now come back in place.
+	return true;
 }
 */
 
 //Handle the incoming messages, according to the msg_type
-static void input_callback(const void* data, uint16_t len, const linkaddr_t* source_address, const linkaddr_t* destination_address) 
+static void input_callback(const void* data, uint16_t len, const linkaddr_t* source_address, const linkaddr_t* destination_address)
 {
 	a_msg received_msg;
-	linkaddr_t* src = (linkaddr_t*)source_address;	
-	
-	//if(len == sizeof((a_msg *)data)) 
-	
+	linkaddr_t* src = (linkaddr_t*)source_address;
+
+	//if(len == sizeof((a_msg *)data))
+
 		memcpy (&received_msg, data, sizeof ((a_msg *)data));
 		LOG_INFO("Received data from: ");
-		LOG_INFO_LLADDR(source_address);	
+		LOG_INFO_LLADDR(source_address);
 		LOG_INFO("\n");
-		
-		if(received_msg.msg_type == ASSOCIATION_REQUEST_MSG) 
+
+		if(received_msg.msg_type == ASSOCIATION_REQUEST_MSG)
 		{
 			//accendere led blu (x mes broadcast)
 			if(insert_cart(received_msg.battery_percentage, src))
@@ -128,7 +127,7 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 				a_msg notification;
 				notification.msg_type = ASSOCIATION_REPLY_MSG;
 				LOG_INFO("Sending acknowledgment of successfull association\n");
-				
+
 				nullnet_buf = (uint8_t*)&notification;
 				nullnet_len = sizeof(notification);
 				NETSTACK_NETWORK.output(src);
@@ -136,17 +135,17 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 			LOG_INFO("New cart associated\n");
 		}
 
-		if(received_msg.msg_type == BATTERY_STATUS_MSG) 
+		if(received_msg.msg_type == BATTERY_STATUS_MSG)
 		{
 			//accendere led purple (mex unicast)
 			if(bat_upgrade(src, received_msg.battery_percentage))
 			{
 				LOG_INFO("Battery level upgraded of ");
 				LOG_INFO_LLADDR(src);
-				LOG_INFO("\n");	
-			}	
+				LOG_INFO("\n");
+			}
 		}
-	
+
 }
 
 //callback function for the ctimer that checks if all the carts have been replaced when the supermarket close
@@ -155,10 +154,10 @@ void check(void *ptr)
 	supermarket_open = !supermarket_open;
 	if(!supermarket_open)
 	{
-		printf("Supermarket closed\n");		
+		printf("Supermarket closed\n");
 		cart* c = cart_list;
 		while(c)
-		{	
+		{
 			if(c->assigned)
 				printf("Customer id %d hasn't replaced his cart\n", (int)c->customer_id);
 			c = c->next;
@@ -167,17 +166,17 @@ void check(void *ptr)
 	else
 		printf("Supermarket is open!\n");
 	process_poll(&assigner_process);
-		
+
 }
 
-PROCESS_THREAD(assigner_process, ev, data) 
+PROCESS_THREAD(assigner_process, ev, data)
 {
 
 	static uint8_t customer_id;
 	static a_msg selection_msg;
 	linkaddr_t* dest_addr;
 	static struct ctimer opening_timer;
-	
+
 	PROCESS_BEGIN();
 
 	cc26xx_uart_set_input(serial_line_input_byte);
@@ -185,12 +184,12 @@ PROCESS_THREAD(assigner_process, ev, data)
 
 	nullnet_set_input_callback(input_callback);
 
-	ctimer_set(&opening_timer, OPENING_PERIOD, check, NULL);	
-	
+	ctimer_set(&opening_timer, OPENING_PERIOD, check, NULL);
+
 	printf("Supermarket is open!\n");
 	printf("Welcome! Please, insert your card id\n");
 
-	while (true) 
+	while (true)
 	{
 		PROCESS_WAIT_EVENT();
 		if(ev == serial_line_event_message)
@@ -205,26 +204,26 @@ PROCESS_THREAD(assigner_process, ev, data)
 				printf("Customer's id: %s\n", (char*)data);
 				customer_id = atoi(data);
 				printf("id: %d\n", (int)customer_id);
-			
+
 				cart* cart_selected = cart_selection();
 				if(!cart_selected)
 				{
 					printf("No cart available!\n");
 					leds_on(LEDS_RED);
 				}
-			
+
 				else
 				{
 					cart_selected->assigned = true;
 					cart_selected->customer_id = customer_id;
-				
+
 
 					//send a notification to the selected cart with the associated customer id
 					selection_msg.msg_type = ASSIGNMENT_MSG;
 					selection_msg.customer_id = customer_id;
-				
+
 					dest_addr = cart_selected->cart_address;
-	 
+
 					nullnet_buf = (uint8_t*)&selection_msg;
 					nullnet_len = sizeof(selection_msg);
 					NETSTACK_NETWORK.output(dest_addr);
@@ -234,7 +233,7 @@ PROCESS_THREAD(assigner_process, ev, data)
 				}
 			}
 		}
-		
+
 		else if(ev == PROCESS_EVENT_POLL)
 			ctimer_reset(&opening_timer);
 	}
