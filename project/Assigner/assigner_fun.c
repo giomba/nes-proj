@@ -61,7 +61,7 @@ bool bat_update(linkaddr_t src_cart_addr, uint8_t battery_level)
 	//looking for cart->address = address of who sent the message with the battery 
 	while(c)
 	{
-		if(linkaddr_cmp(&c->cart_address,&src_cart_addr) == 0)
+		if(linkaddr_cmp(&(c->cart_address),&src_cart_addr) == 0)
 			c = c->next;
 		else
 			break;

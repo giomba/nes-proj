@@ -16,7 +16,7 @@
 
 #define LOG_MODULE "Assigner"
 #define LOG_LEVEL LOG_LEVEL_INFO
-#define OPENING_PERIOD (30*CLOCK_SECOND)
+#define OPENING_PERIOD (300*CLOCK_SECOND)
 
 
 PROCESS(assigner_process, "Assigner process");
