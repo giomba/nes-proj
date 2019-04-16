@@ -14,8 +14,6 @@
 #include "../common/supermarket_net.h"
 #include "assigner_fun.h"
 
-#define LOG_MODULE "Assigner"
-#define LOG_LEVEL LOG_LEVEL_INFO
 #define OPENING_PERIOD (300*CLOCK_SECOND)
 
 
@@ -45,7 +43,7 @@ static void msg_recv(const void* data, uint16_t len, const linkaddr_t* source_ad
 			handle_battery_msg(src,data);
 			break;
 		default:
-			printf("Invalide type! This message is not for the Assigner");
+			printf("Invalide type! This message is not for the Assigner\n");
 			break;
 	}
 
