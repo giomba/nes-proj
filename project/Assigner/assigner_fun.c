@@ -38,8 +38,11 @@ bool insert_cart(uint8_t new_req_battery, linkaddr_t mac_cart_addr)
 		return false;
 	}
 	cart* c = cart_list;
-	while(linkaddr_cmp(&(c->cart_address),&mac_cart_addr) == 0)
-		c = c->next;
+	while(c)
+	{
+		if(linkaddr_cmp(&(c->cart_address),&mac_cart_addr) == 0)
+			c = c->next;
+	}
 	if(c)
 		printf("Cart already associated!\n");
 	else
