@@ -53,9 +53,10 @@ void s_shopping(process_event_t ev, process_data_t data) {
         if (event == CART_EVENT_NEW_PRODUCT) {
             /* add product to list */
             if (nprod < MAX_PRODUCT) {
-                printf("[I] Adding item %d to cart\n", nprod);
                 item_msg* m = (item_msg*)pkt.data;
-                memcpy(&list[nprod++], &m->p, sizeof(product_t));
+                memcpy(&list[nprod], &m->p, sizeof(product_t));
+                printf("[I] Adding item #%d, id %d, price %f to cart\n", nprod, (int)list[nprod].product_id, list[nprod].price);
+                nprod++;
             } else {
                 printf("[W] Too many products. Dropping.\n");
             }
@@ -64,6 +65,7 @@ void s_shopping(process_event_t ev, process_data_t data) {
             /* answer the cash if you are the one with that customer_id */
             if (((cash_out_msg*)pkt.data)->customer_id == customer_id) {
                 printf("[I] It's me! I'm cashing out :-)\n");
+                cash_address = pkt.src;
                 basket_msg m;
                 m.msg_type = BASKET_MSG;
                 m.n_products = nprod - 1;
@@ -91,7 +93,7 @@ void s_cash_out_wait4ack(process_event_t ev, process_data_t data) {
 void s_cash_out_send_list(process_event_t ev, process_data_t data) {
     /* Send list, then go back to initial state */
     for (uint8_t i = 0; i < nprod; ++i) {
-        printf("[I] Sending product %d of %d...\n", i, nprod - 1);
+        printf("[I] Sending product %d of %d: id %d, price: %f\n", i, nprod - 1, (int)list[i].product_id, list[i].price);
         product_msg m;
         m.msg_type = PRODUCT_MSG;
         m.customer_id = customer_id;
@@ -105,7 +107,7 @@ void s_cash_out_send_list(process_event_t ev, process_data_t data) {
     memset(&cash_address, 0, sizeof(cash_address));
 
     printf("[I] END. Go back to ASSOCIATED status\n");
-    etimer_reset(&broadcast_timer);
+    etimer_restart(&broadcast_timer);
     status = ASSOCIATED;
 }
 
