@@ -21,9 +21,9 @@
 static linkaddr_t dest_addr = {{0x00, 0x12, 0x4b, 0x00, 0x0f, 0x24, 0x18, 0x04}};
 
 product_t product_list[] = {
-	{ 1, "21/12/19", 1.05 },
-	{ 2, "12/05/19", 3.25 },
-	{ 3, "05/05/21", 2.50 }
+	{ 1, "21/12/19", 105 },
+	{ 2, "12/05/19", 325 },
+	{ 3, "05/05/21", 250 }
 };
 
 PROCESS(product_proc, "product random generator");
@@ -38,7 +38,7 @@ void scan_product(product_t* p){
 	nullnet_len = sizeof(m);
 
 	NETSTACK_NETWORK.output(&dest_addr);
-	LOG_INFO("Product id [%d] scanned from ", (int)p->product_id);
+	LOG_INFO("Product id [%d, %d] scanned from ", (int)p->product_id, (int)p->price);
 	LOG_INFO_LLADDR(&dest_addr);
 	LOG_INFO_("\n");
 }

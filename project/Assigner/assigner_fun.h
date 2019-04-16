@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include "sys/log.h"
 
+#define LOG_MODULE "Assigner"
+#define LOG_LEVEL LOG_LEVEL_INFO
 
 typedef struct cart
 {
