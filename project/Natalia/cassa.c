@@ -93,7 +93,7 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 		}
 		if (received_msg.msg_type == PRODUCT_MSG) {
 			product_msg *product = (product_msg*)(&received_msg);
-            printf("Received id: %d, price %f\n", (int)product->product_id, (int)product->price);
+            printf("Received id: %d, price %d\n", (int)product->product_id, (int)product->price);
 			uint8_t index = invoice_index(product->customer_id, invoices);
 			if (index != -1) {
 				if (invoices[index].n_prods > 0) {
@@ -101,7 +101,7 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 					invoices[index].n_prods--;
 				}
 				if (invoices[index].n_prods == 0) {
-					printf("Total sum for client %d is %f\n", (int)invoices[index].customer_id, invoices[index].total_sum);
+					printf("Total sum for client %d is %d\n", (int)invoices[index].customer_id, (int)invoices[index].total_sum);
 					invoices[index].empty = 1;
 				}
 			}else
