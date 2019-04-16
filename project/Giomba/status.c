@@ -55,7 +55,7 @@ void s_shopping(process_event_t ev, process_data_t data) {
             if (nprod < MAX_PRODUCT) {
                 item_msg* m = (item_msg*)pkt.data;
                 memcpy(&list[nprod], &m->p, sizeof(product_t));
-                printf("[I] Adding item #%d, id %d, price %f to cart\n", nprod, (int)list[nprod].product_id, list[nprod].price);
+                printf("[I] Adding item #%d, id %d, price %d to cart\n", nprod, (int)list[nprod].product_id, (int)list[nprod].price);
                 nprod++;
             } else {
                 printf("[W] Too many products. Dropping.\n");
@@ -93,7 +93,7 @@ void s_cash_out_wait4ack(process_event_t ev, process_data_t data) {
 void s_cash_out_send_list(process_event_t ev, process_data_t data) {
     /* Send list, then go back to initial state */
     for (uint8_t i = 0; i < nprod; ++i) {
-        printf("[I] Sending product %d of %d: id %d, price: %f\n", i, nprod - 1, (int)list[i].product_id, list[i].price);
+        printf("[I] Sending product %d of %d: id %d, price: %d\n", i, nprod - 1, (int)list[i].product_id, (int)list[i].price);
         product_msg m;
         m.msg_type = PRODUCT_MSG;
         m.customer_id = customer_id;

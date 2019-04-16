@@ -18,7 +18,7 @@
 
 /* Hardcoded MAC Address for cart */
 /* This is used only to emulate the RFID tag */
-static linkaddr_t dest_addr = {{0x00, 0x12, 0x4b, 0x00, 0x0f, 0x24, 0x18, 0x04}};
+static linkaddr_t dest_addr = {{0x00, 0x12, 0x4b, 0x00, 0x0f, 0x82, 0x18, 0x04}};
 
 product_t product_list[] = {
 	{ 1, "21/12/19", 105 },

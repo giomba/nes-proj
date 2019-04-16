@@ -48,7 +48,7 @@ void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linka
             process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
         break;
         default:
-            LOG_INFO("[W] message type unknown\n");
+            LOG_INFO("[W] message type %d unknown\n", ((msg*)data)->msg_type);
             break;
     }
 }
