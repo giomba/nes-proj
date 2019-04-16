@@ -9,9 +9,6 @@
 #include "../common/supermarket_net.h"
 #include "assigner_fun.h"
 
-#define LOG_MODULE "App"
-#define LOG_LEVEL LOG_LEVEL_INFO
-
 
 //function invoked in order to look for the most charged cart to assign to the new arrived client	
 cart* cart_selection()
@@ -40,6 +37,11 @@ bool insert_cart(uint8_t new_req_battery, linkaddr_t mac_cart_addr)
 		printf("Association Failed");
 		return false;
 	}
+	cart* c = cart_list;
+	while(linkaddr_cmp(&(c->cart_address),&mac_cart_addr) == 0)
+		c = c->next;
+	if(c)
+		printf("Cart already associated!"\n);
 	else
 	{
 		new_arrived_cart->cart_address = mac_cart_addr;
@@ -47,7 +49,7 @@ bool insert_cart(uint8_t new_req_battery, linkaddr_t mac_cart_addr)
 		new_arrived_cart->assigned = false;
 		new_arrived_cart->next = cart_list;
 		cart_list = new_arrived_cart;
-		LOG_INFO("Nuovo carrello inserito con mac_address: ");
+		LOG_INFO("New cart added with mac_address: ");
 		LOG_INFO_LLADDR(&(new_arrived_cart->cart_address));
 		printf("\n");
 	}
