@@ -72,7 +72,7 @@ typedef struct product_msg
 	enum message_type msg_type;
 	uint32_t customer_id;
 	uint32_t product_id;
-	float price;
+	uint32_t price;
 
 }product_msg;
 
