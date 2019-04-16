@@ -19,7 +19,7 @@
 typedef struct user_invoice
 {
 	uint8_t n_prods;
-	float total_sum;
+	uint32_t total_sum;
 	uint32_t customer_id;
 	uint8_t empty;
     linkaddr_t address_basket;
@@ -85,7 +85,7 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 				nullnet_buf = (uint8_t*)&start_sending_list;
 
 				LOG_INFO("Sending acknowledgment to start sending list of products to ");
-                LOG_INFO_LLADDR(&(invoices[index].address_basket));
+                		LOG_INFO_LLADDR(&(invoices[index].address_basket));
 				nullnet_len = sizeof(start_sending_list);
 				NETSTACK_NETWORK.output(&(invoices[index].address_basket));
 			} else
@@ -93,7 +93,7 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 		}
 		if (received_msg.msg_type == PRODUCT_MSG) {
 			product_msg *product = (product_msg*)(&received_msg);
-            printf("Received id: %d, price %f\n", (int)product->product_id, product->price);
+            printf("Received id: %d, price %f\n", (int)product->product_id, (int)product->price);
 			uint8_t index = invoice_index(product->customer_id, invoices);
 			if (index != -1) {
 				if (invoices[index].n_prods > 0) {
@@ -123,9 +123,10 @@ PROCESS_THREAD(cassa_main_process, ev, data) {
 	nullnet_set_input_callback(input_callback);	//this should be moved down?
 
 
-	printf("Dear customer, insert your card id\n");
+	
 
 	while (true) {
+		printf("Dear customer, insert your card id\n");
 		PROCESS_WAIT_EVENT_UNTIL(ev == serial_line_event_message);
 
 		printf("Customer's id: %s\n", (char*)data);
