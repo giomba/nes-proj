@@ -38,10 +38,13 @@ bool insert_cart(uint8_t new_req_battery, linkaddr_t mac_cart_addr)
 		return false;
 	}
 	cart* c = cart_list;
-	while(c)
+	//If a cart is reset this will send a new association request even if it was previously associated so I need to check my cart_list and find out if its mac_address is already there, in order to avoid to insert the same cart twice
+	while(c)    
 	{
-		if(linkaddr_cmp(&(c->cart_address),&mac_cart_addr) == 0)
+		if(linkaddr_cmp(&(c->cart_address),&mac_cart_addr) == 0) //Returns 0 if the addresses are different
 			c = c->next;
+		else
+			break;
 	}
 	if(c)
 		printf("Cart already associated!\n");
