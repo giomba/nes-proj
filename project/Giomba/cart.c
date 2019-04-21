@@ -21,6 +21,7 @@ PROCESS_THREAD(cart_main_process, ev, data) {
 
     /*** Variables initialization ***/
     // status = NOT_ASSOCIATED; // TODO DEBUG
+
     status = SHOPPING; // NOT_ASSOCIATED;
     etimer_set(&broadcast_timer, 5 * CLOCK_SECOND);
 
@@ -38,7 +39,7 @@ PROCESS_THREAD(cart_main_process, ev, data) {
 			case ASSOCIATED: s_associated(ev, data); break;
 			case SHOPPING: s_shopping(ev, data); break;
 			case CASH_OUT_WAIT4ACK: s_cash_out_wait4ack(ev, data); break;
-            case CASH_OUT_SEND_LIST: s_cash_out_send_list(ev, data); break;
+			case CASH_OUT_SEND_LIST: s_cash_out_send_list(ev, data); break;
 			default:
                 printf("[E] Invalid status. Resetting status.\n");
                 status = NOT_ASSOCIATED;

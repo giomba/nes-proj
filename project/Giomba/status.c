@@ -1,13 +1,14 @@
 #include "status.h"
 
-#define MAX_PRODUCT 10
+#define MAX_PRODUCT 20
 
 enum CartStatus status;
 struct etimer broadcast_timer;
 linkaddr_t assigner_address;
 linkaddr_t cash_address;
 uint32_t customer_id = 1234;
-uint8_t nprod;
+uint8_t nprod = 0;
+uint8_t nprod_index = 0; 	//variable used to keep track of the index of the product to be sent
 product_t list[MAX_PRODUCT];
 
 void s_not_associated(process_event_t ev, process_data_t data) {
@@ -68,7 +69,7 @@ void s_shopping(process_event_t ev, process_data_t data) {
                 cash_address = pkt.src;
                 basket_msg m;
                 m.msg_type = BASKET_MSG;
-                m.n_products = nprod - 1;
+                m.n_products = nprod;
                 m.customer_id = customer_id;    /* TODO -- is this really needed? */
                 net_send(&m, sizeof(m), &cash_address);
                 status = CASH_OUT_WAIT4ACK;
@@ -92,22 +93,26 @@ void s_cash_out_wait4ack(process_event_t ev, process_data_t data) {
 
 void s_cash_out_send_list(process_event_t ev, process_data_t data) {
     /* Send list, then go back to initial state */
-    for (uint8_t i = 0; i < nprod; ++i) {
-        printf("[I] Sending product %d of %d: id %d, price: %d\n", i, nprod - 1, (int)list[i].product_id, (int)list[i].price);
+   
+   if (nprod_index<nprod) {
+        LOG_INFO("[I] Sending product %d of %d: id %d, price: %d\n", nprod_index, nprod - 1, (int)list[nprod_index].product_id, (int)list[nprod_index].price);
         product_msg m;
         m.msg_type = PRODUCT_MSG;
         m.customer_id = customer_id;
-        m.product_id = list[i].product_id;
-        m.price = list[i].price;
+        m.product_id = list[nprod_index].product_id;
+        m.price = list[nprod_index].price;
         net_send(&m, sizeof(m), &cash_address);
-    }
+	nprod_index++;
+    } 
+    if (nprod_index == nprod) {
     nprod = 0;
-
-    customer_id = 0;
+    nprod_index = 0;
+    customer_id = 1234;
     memset(&cash_address, 0, sizeof(cash_address));
-
+    
     printf("[I] END. Go back to ASSOCIATED status\n");
     etimer_restart(&broadcast_timer);
-    status = ASSOCIATED;
+    status = SHOPPING;
+    }
 }
 

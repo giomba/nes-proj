@@ -12,7 +12,8 @@ enum message_type {
     ITEM_MSG,                   /* from item to cart */
     PRODUCT_MSG,                /* from cart to cash */
     BASKET_MSG,
-    START_OF_LIST_PRODUCTS_MSG
+    START_OF_LIST_PRODUCTS_MSG,
+    PRODUCT_ACK			//everytime the cassa receives a product message , it sends an ack to the cart so that the cart can send the next product message
 };
 
 typedef struct msg {
