@@ -44,8 +44,11 @@ void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linka
             process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
         break;
         case START_OF_LIST_PRODUCTS_MSG:
-	case PRODUCT_ACK:
             event = CART_EVENT_CASH_OUT_ACK;
+            process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
+        break;
+        case PRODUCT_PARTIAL_LIST_ACK:
+            event = CART_EVENT_CASH_OUT_PARTIAL_LIST_ACK;
             process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
         break;
         default:

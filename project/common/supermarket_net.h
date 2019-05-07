@@ -3,6 +3,8 @@
 
 #include "product.h"
 
+#define PRODUCT_ARRAY_MAX_LEN 5
+
 enum message_type {
     ASSOCIATION_REQUEST_MSG,
     ASSOCIATION_REPLY_MSG,
@@ -10,10 +12,10 @@ enum message_type {
     ASSIGNMENT_MSG,
     CASH_OUT_MSG,
     ITEM_MSG,                   /* from item to cart */
-    PRODUCT_MSG,                /* from cart to cash */
+    PRODUCT_PARTIAL_LIST_MSG,   /* from cart to cash */
     BASKET_MSG,
     START_OF_LIST_PRODUCTS_MSG,
-    PRODUCT_ACK			//everytime the cassa receives a product message , it sends an ack to the cart so that the cart can send the next product message
+    PRODUCT_PARTIAL_LIST_ACK    /* everytime the cash register receives a product message, it sends an ack to the cart so that the cart can send the next product message */
 };
 
 typedef struct msg {
@@ -68,14 +70,13 @@ typedef struct cash_out_msg
 }cash_out_msg;
 
 
-typedef struct product_msg
+typedef struct product_partial_list_msg
 {
 	enum message_type msg_type;
-	uint32_t customer_id;
-	uint32_t product_id;
-	uint32_t price;
-
-}product_msg;
+    uint32_t customer_id;
+    uint8_t array_len;
+    product_t p[PRODUCT_ARRAY_MAX_LEN];
+}product_partial_list_msg;
 
 
 #endif

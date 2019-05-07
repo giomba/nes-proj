@@ -8,6 +8,7 @@ linkaddr_t assigner_address;
 linkaddr_t cash_address;
 uint32_t customer_id = 1234;
 uint8_t nprod = 0;
+uint8_t remaining = 0;
 uint16_t totalPrice = 0;
 uint8_t nprod_index = 0; 	//variable used to keep track of the index of the product to be sent
 product_t list[MAX_PRODUCT];
@@ -86,37 +87,52 @@ void s_shopping(process_event_t ev, process_data_t data) {
 void s_cash_out_wait4ack(process_event_t ev, process_data_t data) {
     /* Just wait for cash ack */
     if (event == CART_EVENT_CASH_OUT_ACK) {
-        printf("[I] Acknoweledgment received fromc cash. Now I'll send the list.\n");
+        printf("[I] Acknoweledgment received from cash. Total price is %d. Now I'll send the list.\n", totalPrice);
+        remaining = nprod;
         status = CASH_OUT_SEND_LIST;
-        /* this wakes up the process that otherwise would wait indefinitely for an event that will never occurr */
+        /* this wakes up the process that otherwise would wait indefinitely for an event that will never occur */
         process_post(&cart_main_process, PROCESS_EVENT_MSG, NULL);
     }
 }
 
 void s_cash_out_send_list(process_event_t ev, process_data_t data) {
     /* Send list, then go back to initial state */
-    printf("[I] Total price is %d\n", totalPrice);
 
-   if (nprod_index<nprod) {
-        LOG_INFO("[I] Sending product %d of %d: id %d, price: %d\n", nprod_index, nprod - 1, (int)list[nprod_index].product_id, (int)list[nprod_index].price);
-        product_msg m;
-        m.msg_type = PRODUCT_MSG;
-        m.customer_id = customer_id;
-        m.product_id = list[nprod_index].product_id;
-        m.price = list[nprod_index].price;
-        net_send(&m, sizeof(m), &cash_address);
-	nprod_index++;
-    }
-    if (nprod_index == nprod) {
-    nprod = 0;
-    nprod_index = 0;
-    customer_id = 1234;
-    memset(&cash_address, 0, sizeof(cash_address));
+    printf("[I] Remaining %d products\n", (int)remaining);
 
-    printf("[I] END. Go back to ASSOCIATED status\n");
-    etimer_restart(&broadcast_timer);
-    totalPrice = 0;
-    status = ASSOCIATED;
+    product_partial_list_msg m;
+    m.msg_type = PRODUCT_PARTIAL_LIST_MSG;
+    m.customer_id = customer_id;
+    m.array_len = (remaining < PRODUCT_ARRAY_MAX_LEN) ? remaining : PRODUCT_ARRAY_MAX_LEN;
+
+    uint8_t done = nprod - remaining;
+
+    for (uint8_t i = 0; i < ((remaining < PRODUCT_ARRAY_MAX_LEN) ? remaining : PRODUCT_ARRAY_MAX_LEN); ++i) {
+        printf("[I] Adding %d to the list\n", (int)i);
+        m.p[i] = list[done + i];
     }
+
+    printf("[I] sending list right now\n");
+    net_send(&m, sizeof(m), &cash_address);
+
+    remaining -= (remaining < PRODUCT_ARRAY_MAX_LEN) ? remaining : PRODUCT_ARRAY_MAX_LEN;
+
+    printf("[I] and now remaining %d products\n", (int)remaining);
+
+    if (remaining == 0) {
+        printf("[I] it is the end, so now I reset the state\n");
+        /* reset everything */
+        nprod = 0;
+        nprod_index = 0;
+        customer_id = 1234;
+        totalPrice = 0;
+        memset(&cash_address, 0, sizeof(cash_address));
+
+        printf("[I] List END. Go back to ASSOCIATED status\n");
+        etimer_restart(&broadcast_timer);
+        // status = ASSOCIATED; // TODO DEBUG
+        status = SHOPPING;
+    }
+
 }
 

@@ -21,8 +21,8 @@ PROCESS_THREAD(cart_main_process, ev, data) {
 
     /*** Variables initialization ***/
     // status = NOT_ASSOCIATED; // TODO DEBUG
+    status = SHOPPING;
 
-    status = NOT_ASSOCIATED; // SHOPPING; // NOT_ASSOCIATED;
     etimer_set(&broadcast_timer, 5 * CLOCK_SECOND);
 
     /*** Subsystem initialization ***/

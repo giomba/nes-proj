@@ -76,20 +76,20 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 	LOG_INFO("type %d", ((msg*)data)->msg_type);
 	LOG_INFO("\n");
 	received_msg = (msg*) (&pkt.data);
-		
+
 	//we need to receive an additional message to start the process of receiving the products because if we start receiving the products immediately
-	//in the case of parallel processes we wouldnt know to what client and what basket that product is assosiated with
+	//in the case of parallel processes we wouldnt know to what client and what basket that product is associated with
 	if (received_msg->msg_type == BASKET_MSG) {
 		basket_msg *basket = (basket_msg*) (received_msg);
 		uint8_t index = index_free_spot(invoices);
 		if (index != -1 ) {
 			printf("basket->n_products %d\n", basket->n_products);
 			invoices[index].n_prods = basket->n_products;
-			
+
 			invoices[index].total_sum = 0;
 			invoices[index].customer_id = basket->customer_id;
        		        memcpy(&invoices[index].address_basket, source_address, sizeof(linkaddr_t));
-			
+
 
 			msg start_sending_list;
 			start_sending_list.msg_type = START_OF_LIST_PRODUCTS_MSG;
@@ -101,31 +101,40 @@ static void input_callback(const void* data, uint16_t len, const linkaddr_t* sou
 			NETSTACK_NETWORK.output(&(invoices[index].address_basket));
 		} else
 			printf("Reached max number of customers\n");
-	} else if (received_msg->msg_type == PRODUCT_MSG) {
-		product_msg *product = (product_msg*)(received_msg);
-		printf("Received id: %d, price %d\n", (int)product->product_id, (int)product->price);
-		uint8_t index = invoice_index(product->customer_id, invoices);
-		if (index != -1) {
-			if (invoices[index].n_prods > 0) {
-				invoices[index].total_sum += product->price;
-				invoices[index].n_prods--;
-				//send an ack to the cart so that it knows the cassa has received the product and can send the next product
-				msg product_ack;
-				product_ack.msg_type = PRODUCT_ACK;
-				nullnet_buf = (uint8_t*)&product_ack;
+	} else if (received_msg->msg_type == PRODUCT_PARTIAL_LIST_MSG) {
+		product_partial_list_msg* product_list = (product_partial_list_msg*)(received_msg);
 
-				LOG_INFO("Sending acknowledgment for the product\n ");
-	        		nullnet_len = sizeof(product_ack);
-				NETSTACK_NETWORK.output(&(invoices[index].address_basket));
-				
-			}
-			if (invoices[index].n_prods == 0) {
-				printf("Total sum for client %d is %d\n", (int)invoices[index].customer_id, (int)invoices[index].total_sum);
-				invoices[index].empty = 1;
-			}
-		}else
-		printf("Customer with that id is not associated to any basket!\n");
-	}
+    	uint8_t index = invoice_index(product_list->customer_id, invoices);
+
+        printf("Receiving %d items from customer %d\n", ((int)product_list->array_len) & 0xff, (int)product_list->customer_id);
+
+        for (uint8_t i = 0; i < product_list->array_len; ++i) {
+            product_t p = product_list->p[i];
+
+    		printf("Received id: %d, price %d\n", (int)p.product_id, (int)p.price);
+
+    		if (index != -1) {
+	    		if (invoices[index].n_prods > 0) {
+		    		invoices[index].total_sum += p.price;
+    				invoices[index].n_prods--;
+			    }
+    			if (invoices[index].n_prods == 0) {
+	    			printf("Total sum for client %d is %d\n", (int)invoices[index].customer_id, (int)invoices[index].total_sum);
+		    		invoices[index].empty = 1;
+    			}
+       		} else
+	    	    printf("Customer with that id is not associated to any basket!\n");
+        }
+
+        //send an ack to the cart so that it knows the cash register has received the partial product list and can send the next part
+    	msg product_ack;
+    	product_ack.msg_type = PRODUCT_PARTIAL_LIST_ACK;
+    	nullnet_buf = (uint8_t*)&product_ack;
+		LOG_INFO("Sending acknowledgment for the partial product list\n ");
+   		nullnet_len = sizeof(product_ack);
+    	NETSTACK_NETWORK.output(&(invoices[index].address_basket));
+
+    }
 }
 
 
@@ -137,7 +146,7 @@ PROCESS_THREAD(cassa_main_process, ev, data) {
 	serial_line_init();
 
 	//initialization of the message handler for receiving messages
-	nullnet_set_input_callback(input_callback);	
+	nullnet_set_input_callback(input_callback);
 
 	while (true) {
 		printf("Dear customer, insert your card id\n");
@@ -146,7 +155,7 @@ PROCESS_THREAD(cassa_main_process, ev, data) {
 			uint32_t customer_id;
 			printf("[CASSA INFO] Customer's id: %s\n", (char*)data);
 			customer_id = atoi(data);
-			
+
 			cash_out_msg m;
 			m.msg_type = CASH_OUT_MSG;
 			m.customer_id = customer_id;
