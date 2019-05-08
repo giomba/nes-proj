@@ -1,5 +1,5 @@
 CONTIKI_PROJECT = cart
-PROJECT_SOURCEFILES += sendrecv.c status.c
+PROJECT_SOURCEFILES += sendrecv.c status.c batmon.c leds.cart.c
 PLATFORMS_ONLY = cc26x0-cc13x0
 
 all: $(CONTIKI_PROJECT)

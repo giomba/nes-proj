@@ -17,7 +17,7 @@
 #define LOG_LEVEL LOG_LEVEL_INFO
 
 /* MAC Address for cart -- This emulates the RFID tag */
-static linkaddr_t dest_addr = {{0x00, 0x12, 0x4b, 0x00, 0x0f, 0x82, 0x00, 0x04}};
+static linkaddr_t dest_addr = {{0xca, 0xfe, 0xba, 0xbe, 0xde, 0xad, 0xbe, 0xef}};
 
 product_t product_list[] = {
 	{ 1, "21/12/19", 105 },

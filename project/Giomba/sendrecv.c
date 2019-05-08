@@ -58,6 +58,7 @@ void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linka
 }
 
 void net_send(const void* data, uint16_t len, const linkaddr_t* dst) {
+    printf("[I] sending msg type %d\n", ((msg*)data)->msg_type);
     memcpy(net_buffer, data, len);
     nullnet_len = len;
     NETSTACK_NETWORK.output(dst);

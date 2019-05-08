@@ -3,7 +3,10 @@
 #define MAX_PRODUCT 20
 
 enum CartStatus status;
-struct etimer broadcast_timer;
+struct etimer assigner_timer;   /* timer to periodically make a report to the assigner */
+struct etimer battery_timer;    /* timer to periodically read battery status */
+struct ctimer led_timer;        /* timer to shortly blink leds */
+int8_t battery_charge = 50;
 linkaddr_t assigner_address;
 linkaddr_t cash_address;
 uint32_t customer_id = 1234;
@@ -16,20 +19,24 @@ product_t list[MAX_PRODUCT];
 void s_not_associated(process_event_t ev, process_data_t data) {
     if (ev == PROCESS_EVENT_TIMER) {
         /* at time expiration, send broadcast message to request association with assigner */
-        if (etimer_expired(&broadcast_timer)) {
+        if (etimer_expired(&assigner_timer)) {
             printf("[I] Sending association request msg\n");
             msg m;
             m.msg_type = ASSOCIATION_REQUEST_MSG;
             net_send(&m, sizeof(m), NULL);
-            etimer_reset(&broadcast_timer);
+            etimer_reset(&assigner_timer);
         }
     }
     else    /* if a msg is received from network and represents an association event, then associate */
     if (ev == PROCESS_EVENT_MSG && event == CART_EVENT_ASSOCIATED) {
         printf("[I] Associated with Assigner\n");
+
         assigner_address = pkt.src;
         nprod = 0;
         status = ASSOCIATED;
+
+        /* blink led */
+        led_blink(NULL);
     }
 }
 
@@ -39,14 +46,15 @@ void s_associated(process_event_t ev, process_data_t data) {
         printf("[I] Sending battery level\n");
         struct battery_msg m;
         m.msg_type = BATTERY_STATUS_MSG;
-        m.battery_percentage = 77;
+        m.battery_percentage = battery_charge;
         net_send(&m, sizeof(m), &assigner_address);
-        etimer_reset(&broadcast_timer);
+        etimer_reset(&assigner_timer);
     }
     if (ev == PROCESS_EVENT_MSG && event == CART_EVENT_ASSIGNED) {
         /* cart has been assigned to a new customer */
         customer_id = ((assign_msg*)pkt.data)->customer_id;
         printf("[I] Assigned to customer id %d\n", (int)customer_id);
+        leds_on(LEDS_GREEN);
         status = SHOPPING;
     }
 }
@@ -84,6 +92,7 @@ void s_shopping(process_event_t ev, process_data_t data) {
     }
     if (ev == button_hal_release_event) {   /* any button will do */
         /* ask product to send items to me */
+        printf("[I] Dear product Launchpad, please send items to me\n");
         msg m;
         m.msg_type = START_SHOPPING_MSG;
         net_send(&m, sizeof(m), NULL);
@@ -135,9 +144,10 @@ void s_cash_out_send_list(process_event_t ev, process_data_t data) {
         memset(&cash_address, 0, sizeof(cash_address));
 
         printf("[I] List END. Go back to ASSOCIATED status\n");
-        etimer_restart(&broadcast_timer);
-        // status = ASSOCIATED; // TODO DEBUG
-        status = SHOPPING;
+        etimer_restart(&assigner_timer);
+        leds_off(LEDS_GREEN);
+        status = ASSOCIATED;
+        // status = SHOPPING; // TODO DEBUG
     }
 
 }

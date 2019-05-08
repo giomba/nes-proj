@@ -1,29 +1,26 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "os/dev/leds.h"
-#include "batmon-sensor.h"
-
 #include "../common/supermarket_net.h"
+#include "batmon.h"
 #include "event.h"
 #include "log.h"
 #include "sendrecv.h"
 #include "status.h"
-
-//static linkaddr_t destination_address = {{ 0x00, 0x12, 0x4b, 0x00, 0x0f, 0x8f, 0x18, 0x11 }};
 
 PROCESS(cart_main_process, "Cart Process");
 AUTOSTART_PROCESSES(&cart_main_process);
 
 PROCESS_THREAD(cart_main_process, ev, data) {
 	PROCESS_BEGIN();
-    //	SENSORS_ACTIVATE(batmon_sensor);
 
     /*** Variables initialization ***/
-    // status = NOT_ASSOCIATED; // TODO DEBUG
-    status = SHOPPING;
+    status = NOT_ASSOCIATED; // TODO DEBUG
+    //status = SHOPPING;
 
-    etimer_set(&broadcast_timer, 5 * CLOCK_SECOND);
+    /*** Timer initialization ***/
+    etimer_set(&assigner_timer, 5 * CLOCK_SECOND);
+    etimer_set(&battery_timer, 10 * CLOCK_SECOND);
 
     /*** Subsystem initialization ***/
     net_init();
@@ -33,6 +30,8 @@ PROCESS_THREAD(cart_main_process, ev, data) {
 
 	while (true) {
         PROCESS_WAIT_EVENT();
+
+        if (ev == PROCESS_EVENT_TIMER && etimer_expired(&battery_timer)) batmon();
 
 		switch(status) {
 			case NOT_ASSOCIATED: s_not_associated(ev, data); break;

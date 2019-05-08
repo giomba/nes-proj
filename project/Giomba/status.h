@@ -6,9 +6,11 @@
 #include "sys/process.h"
 
 #include "os/dev/button-hal.h"
+#include "batmon-sensor.h"
 
 #include "../common/supermarket_net.h"
 #include "event.h"
+#include "leds.cart.h"
 #include "sendrecv.h"
 
 enum CartStatus {
@@ -20,7 +22,11 @@ enum CartStatus {
 };
 
 extern enum CartStatus status;
-extern struct etimer broadcast_timer;
+extern struct etimer assigner_timer;
+extern struct etimer battery_timer;
+extern struct ctimer led_timer;
+
+extern int8_t battery_charge;
 
 void s_not_associated(process_event_t ev, process_data_t data);
 void s_associated(process_event_t ev, process_data_t data);
