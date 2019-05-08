@@ -5,6 +5,8 @@
 #include "sys/etimer.h"
 #include "sys/process.h"
 
+#include "os/dev/button-hal.h"
+
 #include "../common/supermarket_net.h"
 #include "event.h"
 #include "sendrecv.h"

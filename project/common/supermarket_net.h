@@ -15,7 +15,8 @@ enum message_type {
     PRODUCT_PARTIAL_LIST_MSG,   /* from cart to cash */
     BASKET_MSG,
     START_OF_LIST_PRODUCTS_MSG,
-    PRODUCT_PARTIAL_LIST_ACK    /* everytime the cash register receives a product message, it sends an ack to the cart so that the cart can send the next product message */
+    PRODUCT_PARTIAL_LIST_ACK,   /* everytime the cash register receives a product message, it sends an ack to the cart so that the cart can send the next product message */
+    START_SHOPPING_MSG
 };
 
 typedef struct msg {

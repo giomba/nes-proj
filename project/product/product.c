@@ -16,8 +16,7 @@
 #define LOG_MODULE "App"
 #define LOG_LEVEL LOG_LEVEL_INFO
 
-/* Hardcoded MAC Address for cart */
-/* This is used only to emulate the RFID tag */
+/* MAC Address for cart -- This emulates the RFID tag */
 static linkaddr_t dest_addr = {{0x00, 0x12, 0x4b, 0x00, 0x0f, 0x82, 0x00, 0x04}};
 
 product_t product_list[] = {
@@ -43,11 +42,21 @@ void scan_product(product_t* p){
 	LOG_INFO_("\n");
 }
 
+void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linkaddr_t* dst) {
+    if (((msg*)data)->msg_type == START_SHOPPING_MSG) {
+        printf("Now sending products to new cart\n");
+        memcpy(&dest_addr, src, sizeof(src));
+    }
+}
+
 PROCESS_THREAD(product_proc, ev, data){
 	PROCESS_BEGIN();
 	// init random number generator
-	unsigned int magic_seed = 12; // oooh :o
+	unsigned int magic_seed = 12;
 	srand(magic_seed);
+
+    // init network subsystem
+    nullnet_set_input_callback(net_recv);
 
 	while(1) {
 		PROCESS_YIELD();

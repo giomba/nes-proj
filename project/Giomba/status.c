@@ -73,7 +73,7 @@ void s_shopping(process_event_t ev, process_data_t data) {
                 basket_msg m;
                 m.msg_type = BASKET_MSG;
                 m.n_products = nprod;
-                m.customer_id = customer_id;    /* TODO -- is this really needed? */
+                m.customer_id = customer_id;    /* this is needed to handle multiple customers at the cash register */
                 net_send(&m, sizeof(m), &cash_address);
                 status = CASH_OUT_WAIT4ACK;
             }
@@ -81,6 +81,12 @@ void s_shopping(process_event_t ev, process_data_t data) {
                 printf("[I] I am customer id %d; customer id %d is cashing out nearby\n", (int)customer_id, (int)((cash_out_msg*)pkt.data)->customer_id );
             }
         }
+    }
+    if (ev == button_hal_release_event) {   /* any button will do */
+        /* ask product to send items to me */
+        msg m;
+        m.msg_type = START_SHOPPING_MSG;
+        net_send(&m, sizeof(m), NULL);
     }
 }
 
