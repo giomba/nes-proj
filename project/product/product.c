@@ -45,7 +45,9 @@ void scan_product(product_t* p){
 void net_recv(const void* data, uint16_t len, const linkaddr_t* src, const linkaddr_t* dst) {
     if (((msg*)data)->msg_type == START_SHOPPING_MSG) {
         printf("Now sending products to new cart\n");
-        memcpy(&dest_addr, src, sizeof(src));
+        LOG_INFO_LLADDR(src);
+
+        memcpy(&dest_addr, src, sizeof(*src));
     }
 }
 
