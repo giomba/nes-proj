@@ -62,7 +62,7 @@ bool insert_cart(uint8_t new_req_battery, linkaddr_t mac_cart_addr)
 	return true;
 }
 
-//Upgrade the battery status of a cart
+//Update the battery status of a cart
 bool bat_update(linkaddr_t src_cart_addr, uint8_t battery_level)
 {
 	cart* c = cart_list;
@@ -108,7 +108,7 @@ void handle_battery_msg(linkaddr_t src, const void* data)
 	memcpy (&bt_msg, data, sizeof ((battery_msg *)data));
 	if(bat_update(src, bt_msg.battery_percentage))
 	{
-		LOG_INFO("Battery level upgraded of ");
+		LOG_INFO("Battery level updated of ");
 		LOG_INFO_LLADDR(&src);
 		printf("\n");	
 		printf("Battery: %d\n", bt_msg.battery_percentage);
