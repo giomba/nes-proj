@@ -14,7 +14,7 @@
 #include "../common/supermarket_net.h"
 #include "assigner_fun.h"
 
-#define OPENING_PERIOD (300*CLOCK_SECOND)
+#define OPENING_PERIOD (1800*CLOCK_SECOND)
 
 
 PROCESS(assigner_process, "Assigner process");
