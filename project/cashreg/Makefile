@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = serial-test
+CONTIKI_PROJECT = cashreg
 PLATFORMS_ONLY = cc26x0-cc13x0
 all: $(CONTIKI_PROJECT)
 
