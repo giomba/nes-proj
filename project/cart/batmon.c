@@ -22,7 +22,7 @@ void batmon(void) {
     }
 
     /* turn on red led if battery charge is low */
-    if (battery_charge < 48) {  /* TODO */
+    if (battery_charge < 48) {
         leds_on(LEDS_RED);
     } else {
         leds_off(LEDS_RED);

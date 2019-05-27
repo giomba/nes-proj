@@ -15,8 +15,7 @@ PROCESS_THREAD(cart_main_process, ev, data) {
 	PROCESS_BEGIN();
 
     /*** Variables initialization ***/
-    status = NOT_ASSOCIATED; // TODO DEBUG
-    //status = SHOPPING;
+    status = NOT_ASSOCIATED;
 
     /*** Timer initialization ***/
     etimer_set(&assigner_timer, 5 * CLOCK_SECOND);

@@ -147,7 +147,6 @@ void s_cash_out_send_list(process_event_t ev, process_data_t data) {
         etimer_restart(&assigner_timer);
         leds_off(LEDS_GREEN);
         status = ASSOCIATED;
-        // status = SHOPPING; // TODO DEBUG
     }
 
 }
