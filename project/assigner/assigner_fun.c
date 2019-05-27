@@ -86,7 +86,6 @@ bool bat_update(linkaddr_t src_cart_addr, uint8_t battery_level)
 
 void handle_association_request(linkaddr_t src, const void* data)
 {
-	//turn on the led for association msg received
 	assoc_req_msg ar_msg;
 	memcpy (&ar_msg, data, sizeof ((assoc_req_msg *)data));
 	if(insert_cart(ar_msg.battery_percentage, src))
@@ -105,7 +104,6 @@ void handle_association_request(linkaddr_t src, const void* data)
 
 void handle_battery_msg(linkaddr_t src, const void* data)
 {
-	//turn on the led for battery msg received
 	battery_msg bt_msg;
 	memcpy (&bt_msg, data, sizeof ((battery_msg *)data));
 	if(bat_update(src, bt_msg.battery_percentage))

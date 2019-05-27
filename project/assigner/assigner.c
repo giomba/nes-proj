@@ -79,19 +79,16 @@ PROCESS_THREAD(assigner_process, ev, data)
 			if(!supermarket_open)
 			{
 				printf("Supermarket is closed! Please, come back tomorrow!\n");
-				//leds_on(LEDS_RED);
 			}
 			else
 			{
 				printf("Customer's id: %s\n", (char*)data);
 				customer_id = atoi(data);
-				//printf("id: %lu\n", (uint32_t)customer_id);
 			
 				cart* cart_selected = cart_selection();
 				if(!cart_selected)
 				{
 					printf("No cart available!\n");
-					//leds_on(LEDS_RED);
 				}
 			
 				else
@@ -116,7 +113,6 @@ PROCESS_THREAD(assigner_process, ev, data)
 					NETSTACK_NETWORK.output(&dest_addr);
 
 					printf("Cart unblocked!\n");
-					//leds_on(LEDS_GREEN);
 				}
 			}
 		}
